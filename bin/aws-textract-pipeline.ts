@@ -8,5 +8,5 @@ const app = new cdk.App();
 
 new AwsTextractPipelineStack(app, "AwsTextractPipelineStack", {
   env: { region: "us-east-1" },
-  ...envConfig,
+  ...envConfig
 });
