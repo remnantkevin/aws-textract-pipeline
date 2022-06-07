@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ses from "aws-cdk-lib/aws-ses";
@@ -17,11 +19,7 @@ interface AwsTextractPipelineStackProps extends cdk.StackProps {
 }
 
 export class AwsTextractPipelineStack extends cdk.Stack {
-  constructor(
-    scope: Construct,
-    id: string,
-    props: AwsTextractPipelineStackProps
-  ) {
+  constructor(scope: Construct, id: string, props: AwsTextractPipelineStackProps) {
     super(scope, id, props);
 
     const bucket = new s3.Bucket(this, "bucket", {
@@ -31,9 +29,9 @@ export class AwsTextractPipelineStack extends cdk.Stack {
       autoDeleteObjects: true,
       lifecycleRules: [
         {
-          expiration: cdk.Duration.days(7),
-        },
-      ],
+          expiration: cdk.Duration.days(7)
+        }
+      ]
     });
 
     const emailReceivingRuleSet = new ses.ReceiptRuleSet(this, "rule-set", {
@@ -43,11 +41,9 @@ export class AwsTextractPipelineStack extends cdk.Stack {
           enabled: true,
           scanEnabled: true,
           tlsPolicy: ses.TlsPolicy.REQUIRE,
-          actions: [
-            new sesActions.S3({ bucket, objectKeyPrefix: "raw-email" }),
-          ],
-        },
-      ],
+          actions: [new sesActions.S3({ bucket, objectKeyPrefix: "raw-email" })]
+        }
+      ]
     });
   }
 }
