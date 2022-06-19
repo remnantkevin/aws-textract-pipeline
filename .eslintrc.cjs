@@ -38,7 +38,7 @@ module.exports = {
     }
   },
   rules: {
-    "no-unused-expressions": "error",
+    "no-unused-expressions": "error", // https://eslint.org/docs/rules/no-unused-expressions
     "sort-keys": ["warn", "asc", { caseSensitive: false, natural: false, minKeys: 2 }], // https://eslint.org/docs/rules/sort-keys
     // https://eslint.org/docs/rules/sort-imports
     "sort-imports": [
@@ -62,14 +62,15 @@ module.exports = {
     "import/newline-after-import": "warn", // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/newline-after-import.md
     "import/no-self-import": "error", // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-self-import.md
 
-    "@typescript-eslint/consistent-type-definitions": ["warn", "type"],
-    "@typescript-eslint/consistent-type-exports": "warn",
-    "@typescript-eslint/consistent-type-imports": "warn",
-    "default-param-last": "off",
-    "@typescript-eslint/default-param-last": "warn",
-    "dot-notation": "off",
-    "@typescript-eslint/dot-notation": "warn",
-    "@typescript-eslint/array-type": ["warn", { default: "array-simple" }],
+    "@typescript-eslint/consistent-type-definitions": ["warn", "type"], // https://typescript-eslint.io/rules/consistent-type-definitions
+    "@typescript-eslint/consistent-type-exports": "warn", // https://typescript-eslint.io/rules/consistent-type-exports
+    "@typescript-eslint/consistent-type-imports": "warn", // https://typescript-eslint.io/rules/consistent-type-imports
+    "default-param-last": "off", // https://eslint.org/docs/rules/default-param-last
+    "@typescript-eslint/default-param-last": "warn", // https://typescript-eslint.io/rules/default-param-last
+    "dot-notation": "off", // https://eslint.org/docs/rules/dot-notation
+    "@typescript-eslint/dot-notation": "warn", // https://typescript-eslint.io/rules/dot-notation
+    "@typescript-eslint/array-type": ["warn", { default: "array-simple" }], // https://typescript-eslint.io/rules/array-type
+    // https://typescript-eslint.io/rules/member-ordering
     "@typescript-eslint/member-ordering": [
       "warn",
       {
@@ -206,7 +207,8 @@ module.exports = {
         }
       }
     ],
-    "no-magic-numbers": "off",
+    "no-magic-numbers": "off", // https://eslint.org/docs/rules/no-magic-numbers
+    // https://typescript-eslint.io/rules/no-magic-numbers
     "@typescript-eslint/no-magic-numbers": [
       "warn",
       {
@@ -217,7 +219,7 @@ module.exports = {
         ignoreTypeIndexes: true
       }
     ],
-    "@typescript-eslint/no-meaningless-void-operator": "warn",
-    "@typescript-eslint/sort-type-union-intersection-members": "warn"
+    "@typescript-eslint/no-meaningless-void-operator": "warn", // https://typescript-eslint.io/rules/no-meaningless-void-operator
+    "@typescript-eslint/sort-type-union-intersection-members": "warn" // https://typescript-eslint.io/rules/sort-type-union-intersection-members
   }
 };
