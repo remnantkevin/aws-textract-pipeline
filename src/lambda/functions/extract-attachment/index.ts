@@ -1,15 +1,18 @@
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
-import { AttachmentStream, MailParser, MessageText } from "mailparser";
-import { Readable, Transform } from "node:stream";
+import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import * as process from "process";
-import type { Context, S3Event } from "aws-lambda";
+import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import { MailParser } from "mailparser";
+import { err, ok } from "neverthrow";
 import { use } from "simple-runtypes";
+import { log, wrapError } from "../../shared/utils.js";
 import { EmailHeaders, EnvironmentVariables } from "./runtypes.js";
 import type { UploadConfig, UploadEmailAttachmentResult, UploadMetadata } from "./types.js";
-import { err, ok, Result } from "neverthrow";
-import { log, wrapError } from "../../shared/utils.js";
+import type { Context, S3Event } from "aws-lambda";
+import type { AttachmentStream, MessageText } from "mailparser";
+import type { Result } from "neverthrow";
+import type { Transform } from "node:stream";
 
 const s3Client = new S3Client({});
 const envVariables = EnvironmentVariables(process.env);
@@ -102,9 +105,9 @@ async function uploadEmailAttachment(
     s3Client,
     {
       bucket: envVariables.S3_BUCKET_FOR_ATTACHMENT,
+      contentType: "application/pdf",
       key: `${envVariables.S3_PREFIX_FOR_ATTACHMENT}${requestId}`,
-      readStream: attachmentReadStreamResult.value,
-      contentType: "application/pdf"
+      readStream: attachmentReadStreamResult.value
     },
     getMetadataFromEmailHeaders(emailHeaders)
   );
@@ -146,10 +149,10 @@ function createAttachmentReadStreamPromise(attachmentParserStream: MailParser): 
 
 function getMetadataFromEmailHeaders(headers: EmailHeaders): UploadMetadata {
   return {
+    date: headers.date,
     from: headers.from.value[0].address,
-    to: headers.to.value[0].address,
     subject: headers.subject,
-    date: headers.date
+    to: headers.to.value[0].address
   };
 }
 
@@ -184,10 +187,10 @@ function createS3UploadWriteStream(
   return new Upload({
     client: s3Client,
     params: {
-      Bucket: uploadConfig.bucket,
-      Key: uploadConfig.key,
       Body: uploadConfig.readStream,
+      Bucket: uploadConfig.bucket,
       ContentType: uploadConfig.contentType,
+      Key: uploadConfig.key,
       Metadata: uploadMetadata
     }
   });

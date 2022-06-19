@@ -1,3 +1,5 @@
+/* eslint-disable sort-keys */
+
 module.exports = {
   root: true,
   env: { node: true },
@@ -7,11 +9,215 @@ module.exports = {
     sourceType: "module",
     project: "./tsconfig.eslint.json"
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "import"],
   extends: [
     "eslint:recommended",
+
+    // https://github.com/import-js/eslint-plugin-import#typescript
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+
+    // https://typescript-eslint.io/docs/linting/type-linting
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:@typescript-eslint/strict", // https://typescript-eslint.io/docs/linting/configs#strict
+
     "prettier"
-  ]
+  ],
+  // https://github.com/import-js/eslint-plugin-import#resolvers
+  // https://github.com/alexgorbatchev/eslint-import-resolver-typescript#configuration
+  settings: {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts"]
+    },
+    "import/resolver": {
+      typescript: {
+        alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code
+        project: "./tsconfig.eslint.json"
+      }
+    }
+  },
+  rules: {
+    "no-unused-expressions": "error",
+    "sort-keys": ["warn", "asc", { caseSensitive: false, natural: false, minKeys: 2 }], // https://eslint.org/docs/rules/sort-keys
+    // https://eslint.org/docs/rules/sort-imports
+    "sort-imports": [
+      "warn",
+      {
+        ignoreCase: true,
+        ignoreDeclarationSort: true, // handled by "import/order" rule
+        ignoreMemberSort: false // 'member sort' is the reason "sort-imports" is used (it is not available through "import/order")
+      }
+    ],
+
+    // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md
+    "import/order": [
+      "warn",
+      {
+        groups: ["builtin", "external", "parent", "sibling", "index", "type"],
+        alphabetize: { order: "asc", caseInsensitive: true }
+      }
+    ],
+    "import/first": "warn", // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/first.md
+    "import/newline-after-import": "warn", // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/newline-after-import.md
+    "import/no-self-import": "error", // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-self-import.md
+
+    "@typescript-eslint/consistent-type-definitions": ["warn", "type"],
+    "@typescript-eslint/consistent-type-exports": "warn",
+    "@typescript-eslint/consistent-type-imports": "warn",
+    "default-param-last": "off",
+    "@typescript-eslint/default-param-last": "warn",
+    "dot-notation": "off",
+    "@typescript-eslint/dot-notation": "warn",
+    "@typescript-eslint/array-type": ["warn", { default: "array-simple" }],
+    "@typescript-eslint/member-ordering": [
+      "warn",
+      {
+        default: {
+          // default order: https://typescript-eslint.io/rules/member-ordering#default-configuration
+          memberTypes: [
+            // Index signature
+            "signature",
+
+            // Fields
+            "public-static-field",
+            "protected-static-field",
+            "private-static-field",
+
+            "public-decorated-field",
+            "protected-decorated-field",
+            "private-decorated-field",
+
+            "public-instance-field",
+            "protected-instance-field",
+            "private-instance-field",
+
+            "public-abstract-field",
+            "protected-abstract-field",
+            "private-abstract-field",
+
+            "public-field",
+            "protected-field",
+            "private-field",
+
+            "static-field",
+            "instance-field",
+            "abstract-field",
+
+            "decorated-field",
+
+            "field",
+
+            // Constructors
+            "public-constructor",
+            "protected-constructor",
+            "private-constructor",
+
+            "constructor",
+
+            // Getters
+            "public-static-get",
+            "protected-static-get",
+            "private-static-get",
+
+            "public-decorated-get",
+            "protected-decorated-get",
+            "private-decorated-get",
+
+            "public-instance-get",
+            "protected-instance-get",
+            "private-instance-get",
+
+            "public-abstract-get",
+            "protected-abstract-get",
+            "private-abstract-get",
+
+            "public-get",
+            "protected-get",
+            "private-get",
+
+            "static-get",
+            "instance-get",
+            "abstract-get",
+
+            "decorated-get",
+
+            "get",
+
+            // Setters
+            "public-static-set",
+            "protected-static-set",
+            "private-static-set",
+
+            "public-decorated-set",
+            "protected-decorated-set",
+            "private-decorated-set",
+
+            "public-instance-set",
+            "protected-instance-set",
+            "private-instance-set",
+
+            "public-abstract-set",
+            "protected-abstract-set",
+            "private-abstract-set",
+
+            "public-set",
+            "protected-set",
+            "private-set",
+
+            "static-set",
+            "instance-set",
+            "abstract-set",
+
+            "decorated-set",
+
+            "set",
+
+            // Methods
+            "public-static-method",
+            "protected-static-method",
+            "private-static-method",
+
+            "public-decorated-method",
+            "protected-decorated-method",
+            "private-decorated-method",
+
+            "public-instance-method",
+            "protected-instance-method",
+            "private-instance-method",
+
+            "public-abstract-method",
+            "protected-abstract-method",
+            "private-abstract-method",
+
+            "public-method",
+            "protected-method",
+            "private-method",
+
+            "static-method",
+            "instance-method",
+            "abstract-method",
+
+            "decorated-method",
+
+            "method"
+          ],
+          order: "alphabetically-case-insensitive"
+        }
+      }
+    ],
+    "no-magic-numbers": "off",
+    "@typescript-eslint/no-magic-numbers": [
+      "warn",
+      {
+        ignoreArrayIndexes: true,
+        ignoreDefaultValues: true,
+        ignoreNumericLiteralTypes: true,
+        ignoreReadonlyClassProperties: true,
+        ignoreTypeIndexes: true
+      }
+    ],
+    "@typescript-eslint/no-meaningless-void-operator": "warn",
+    "@typescript-eslint/sort-type-union-intersection-members": "warn"
+  }
 };

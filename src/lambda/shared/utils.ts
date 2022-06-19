@@ -1,4 +1,5 @@
-import { err, Err } from "neverthrow";
+import { err } from "neverthrow";
+import type { Err } from "neverthrow";
 
 export function log(error: unknown, customMessage?: string): void {
   if (customMessage) {

@@ -7,15 +7,15 @@ export const EnvironmentVariables = sloppyRecord({
 });
 export type EnvironmentVariables = ReturnType<typeof EnvironmentVariables>;
 
-const Email = string({ minLength: 1, match: /@/ });
+const Email = string({ match: /@/, minLength: 1 });
 
 export const EmailAddress = sloppyRecord({ address: Email });
 
 // TODO: validate MIME type
 export const EmailHeaders = sloppyRecord({
-  subject: string({ minLength: 1 }),
+  date: dateAsString(),
   from: sloppyRecord({ value: array(EmailAddress) }),
-  to: sloppyRecord({ value: array(EmailAddress) }),
-  date: dateAsString()
+  subject: string({ minLength: 1 }),
+  to: sloppyRecord({ value: array(EmailAddress) })
 });
 export type EmailHeaders = ReturnType<typeof EmailHeaders>;

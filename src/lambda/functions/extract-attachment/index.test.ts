@@ -1,13 +1,14 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { mockClient, mockLibStorageUpload } from "aws-sdk-client-mock";
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Buffer } from "node:buffer";
 import { createReadStream } from "node:fs";
 import * as path from "node:path";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { mockClient, mockLibStorageUpload } from "aws-sdk-client-mock";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { main } from "./index.js";
-import { EnvironmentVariables } from "./runtypes.js";
 import { generateContext } from "./test-helpers/test-context.js";
 import { generateS3PutEvent } from "./test-helpers/test-events.js";
+import { main } from "./index.js";
+import type { EnvironmentVariables } from "./runtypes.js";
 
 const S3ClientMock = mockClient(S3Client);
 mockLibStorageUpload(S3ClientMock);
@@ -56,13 +57,13 @@ describe("when email has an attachment", () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       Body: expect.any(Buffer),
       Bucket: "bucket-name-test",
-      Key: `prefix-name-test/${context.awsRequestId}`,
       ContentType: "application/pdf",
+      Key: `prefix-name-test/${context.awsRequestId}`,
       Metadata: {
+        date: "Mon Jun 13 2022 08:07:59 GMT+0000 (Coordinated Universal Time)",
         from: "testing@gmail.com",
-        to: "textract@email.com",
         subject: "Test subject 1",
-        date: "Mon Jun 13 2022 08:07:59 GMT+0000 (Coordinated Universal Time)"
+        to: "textract@email.com"
       }
     });
   });

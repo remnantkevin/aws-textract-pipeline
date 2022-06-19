@@ -4,14 +4,14 @@ import type { Readable } from "node:stream";
 
 export type UploadConfig = {
   bucket: string;
+  contentType: string;
   key: string;
   readStream: Readable;
-  contentType: string;
 };
 
 export type UploadMetadata = Record<string, string>;
 
 export type UploadEmailAttachmentResult = Result<
-  CompleteMultipartUploadCommandOutput | AbortMultipartUploadCommandOutput,
+  AbortMultipartUploadCommandOutput | CompleteMultipartUploadCommandOutput,
   Error
 >;
