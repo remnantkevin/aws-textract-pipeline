@@ -9,6 +9,7 @@ import { use } from "simple-runtypes";
 import { EmailHeaders, EnvironmentVariables } from "./runtypes.js";
 import type { UploadConfig, UploadEmailAttachmentResult, UploadMetadata } from "./types.js";
 import { err, ok, Result } from "neverthrow";
+import { log, wrapError } from "../../shared/utils.js";
 
 const s3Client = new S3Client({});
 const envVariables = EnvironmentVariables(process.env);
@@ -19,7 +20,7 @@ export async function main(event: S3Event, context: Context) {
 
   const emailHeadersResult = await getEmailHeaders(s3Client, sourceBucket, sourceKey);
   if (emailHeadersResult.isErr()) {
-    console.log(JSON.stringify(emailHeadersResult.error, Object.getOwnPropertyNames(emailHeadersResult.error)));
+    log(emailHeadersResult.error);
     return;
   }
 
@@ -31,7 +32,7 @@ export async function main(event: S3Event, context: Context) {
     context.awsRequestId
   );
   if (uploadResult.isErr()) {
-    console.log(JSON.stringify(uploadResult.error, Object.getOwnPropertyNames(uploadResult.error)));
+    log(uploadResult.error);
     return;
   }
   return { success: true };
@@ -110,7 +111,7 @@ async function uploadEmailAttachment(
   try {
     return ok(await attachmentWriteStream.done());
   } catch (error: unknown) {
-    return err(new Error("Failed to upload"));
+    return wrapError(error);
   }
 }
 
@@ -171,7 +172,7 @@ async function createS3ObjectReadStream(
       return err(new Error("Invalid type of 'getObjectCommandOutput.Body'"));
     }
   } catch (error: unknown) {
-    return err(new Error("Error occurred while creating GetObjectCommand"));
+    return wrapError(error);
   }
 }
 
