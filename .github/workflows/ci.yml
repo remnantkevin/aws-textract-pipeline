@@ -22,6 +22,9 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
+    - run: cd src/lambda/functions/extract-attachment
+    - run: npm ci
+    - run: cd ../../../..
     - run: npm run lint:check
     - run: npm run build:noEmit
     - run: npm run test
