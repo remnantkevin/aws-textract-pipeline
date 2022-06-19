@@ -8,37 +8,42 @@
     "url": "https://github.com/remnantkevin"
   },
   "private": "true",
+  "type": "module",
   "scripts": {
-    "lint": "eslint . --ext .ts",
+    "lint:check": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format:check": "prettier --check '**/*.ts",
     "format:fix": "prettier --write '**/*.ts'",
     "build": "tsc",
+    "build:noEmit": "tsc --noEmit",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "TZ=UTC vitest run",
     "cdk": "cdk"
   },
   "dependencies": {
     "aws-cdk-lib": "2.27.0",
     "constructs": "10.1.28",
-    "envalid": "7.3.1",
+    "neverthrow": "4.3.1",
+    "simple-runtypes": "7.1.0",
     "source-map-support": "0.5.21"
   },
   "devDependencies": {
-    "@types/jest": "27.5.2",
+    "@types/aws-lambda": "8.10.98",
     "@types/node": "16.11.38",
     "@types/source-map-support": "0.5.4",
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "@typescript-eslint/parser": "5.27.1",
     "aws-cdk": "2.27.0",
+    "aws-sdk-client-mock": "0.6.2",
     "esbuild": "0.14.42",
     "eslint": "8.17.0",
     "eslint-config-prettier": "8.5.0",
-    "jest": "27.5.1",
+    "eslint-import-resolver-typescript": "2.7.1",
+    "eslint-plugin-import": "2.26.0",
     "prettier": "2.6.2",
-    "ts-jest": "27.1.5",
     "ts-node": "10.8.1",
-    "typescript": "4.7.3"
+    "typescript": "4.7.3",
+    "vitest": "0.15.1"
   },
   "bin": {
     "aws-textract-pipeline": "bin/aws-textract-pipeline.js"

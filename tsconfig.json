@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
-    "module": "commonjs",
-    "lib": ["es2018"],
+    "target": "ES2021",
+    "module": "node16",
+    "lib": ["ES2021", "DOM"],
+    "moduleResolution": "Node",
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -17,7 +18,9 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
+    "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types"]
   },
+  "include": ["bin/**/*", "lib/**/*", "src/**/*", "test/**/*", "env.config.ts", "env.config.sample.ts"],
   "exclude": ["node_modules", "cdk.out"]
 }

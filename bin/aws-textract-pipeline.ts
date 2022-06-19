@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import * as cdk from "aws-cdk-lib";
 import "source-map-support/register";
-import { AwsTextractPipelineStack } from "../lib/aws-textract-pipeline-stack";
-import { envConfig } from "../lib/env-config";
+import { AwsTextractPipelineStack } from "../lib/aws-textract-pipeline-stack.js";
+import { envConfig } from "../lib/stack-config.js";
 
 const app = new cdk.App();
 
