@@ -24,6 +24,7 @@ jobs:
     - run: npm ci
       working-directory: src/lambda/functions/extract-attachment 
     - run: npm ci
+    - run: mv env.config.sample.ts env.config.ts
     - run: npm run lint:check
     - run: npm run build:noEmit
     - run: npm run test
