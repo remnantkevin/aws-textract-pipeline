@@ -2,21 +2,25 @@
 import { Buffer } from "node:buffer";
 import { createReadStream } from "node:fs";
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { mockClient, mockLibStorageUpload } from "aws-sdk-client-mock";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { EnvironmentVariables } from "./runtypes.js";
 import { generateContext } from "./test-helpers/test-context.js";
 import { generateS3PutEvent } from "./test-helpers/test-events.js";
 import { main } from "./index.js";
-import type { EnvironmentVariables } from "./runtypes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const S3ClientMock = mockClient(S3Client);
 mockLibStorageUpload(S3ClientMock);
 
-vi.mock("process", () => {
+vi.mock("node:process", () => {
   const env: EnvironmentVariables = {
-    S3_BUCKET_FOR_ATTACHMENT: "bucket-name-test",
-    S3_PREFIX_FOR_ATTACHMENT: "prefix-name-test/"
+    S3_BUCKET: "bucket-name-test",
+    S3_PREFIX_ATTACHMENT: "prefix-name-test/"
   };
 
   return {

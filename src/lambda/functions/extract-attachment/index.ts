@@ -1,18 +1,18 @@
+import * as process from "node:process";
 import { Readable } from "node:stream";
+import type { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import * as process from "process";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
+import type { Context, S3Event } from "aws-lambda";
 import { MailParser } from "mailparser";
+import type { AttachmentStream, MessageText } from "mailparser";
 import { err, ok } from "neverthrow";
+import type { Result } from "neverthrow";
 import { use } from "simple-runtypes";
 import { log, wrapError } from "../../shared/utils.js";
 import { EmailHeaders, EnvironmentVariables } from "./runtypes.js";
 import type { UploadConfig, UploadEmailAttachmentResult, UploadMetadata } from "./types.js";
-import type { Context, S3Event } from "aws-lambda";
-import type { AttachmentStream, MessageText } from "mailparser";
-import type { Result } from "neverthrow";
-import type { Transform } from "node:stream";
 
 const s3Client = new S3Client({});
 const envVariables = EnvironmentVariables(process.env);
@@ -104,9 +104,9 @@ async function uploadEmailAttachment(
   const attachmentWriteStream = createS3UploadWriteStream(
     s3Client,
     {
-      bucket: envVariables.S3_BUCKET_FOR_ATTACHMENT,
+      bucket: envVariables.S3_BUCKET,
       contentType: "application/pdf",
-      key: `${envVariables.S3_PREFIX_FOR_ATTACHMENT}${requestId}`,
+      key: `${envVariables.S3_PREFIX_ATTACHMENT}${requestId}`,
       readStream: attachmentReadStreamResult.value
     },
     getMetadataFromEmailHeaders(emailHeaders)

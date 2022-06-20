@@ -1,0 +1,8 @@
+{
+  "name": "start-text-detection",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-textract": "3.112.0"
+  }
+}

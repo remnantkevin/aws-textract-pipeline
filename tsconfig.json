@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2021",
-    "module": "node16",
+    "module": "ESNext", // required for ts-node (which is used by the cdk CLI) to work with ESM
     "lib": ["ES2021", "DOM"],
     "moduleResolution": "Node",
+    "esModuleInterop": true,
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -22,5 +23,9 @@
     "typeRoots": ["./node_modules/@types"]
   },
   "include": ["bin/**/*", "lib/**/*", "src/**/*", "test/**/*", "env.config.ts", "env.config.sample.ts"],
-  "exclude": ["node_modules", "cdk.out"]
+  "exclude": ["node_modules", "cdk.out"],
+  // ts-node is used by the cdk CLI
+  "ts-node": {
+    "esm": true // https://typestrong.org/ts-node/docs/imports/#native-ecmascript-modules
+  }
 }

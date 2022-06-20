@@ -2,8 +2,8 @@ import { array, sloppyRecord, string } from "simple-runtypes";
 import { dateAsString } from "../../shared/runtype-factories.js";
 
 export const EnvironmentVariables = sloppyRecord({
-  S3_BUCKET_FOR_ATTACHMENT: string(),
-  S3_PREFIX_FOR_ATTACHMENT: string()
+  S3_BUCKET: string({ minLength: 1 }),
+  S3_PREFIX_ATTACHMENT: string({ minLength: 1 })
 });
 export type EnvironmentVariables = ReturnType<typeof EnvironmentVariables>;
 
