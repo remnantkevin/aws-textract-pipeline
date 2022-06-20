@@ -9,7 +9,7 @@ module.exports = {
     sourceType: "module",
     project: "./tsconfig.eslint.json"
   },
-  plugins: ["@typescript-eslint", "import"],
+  plugins: ["@typescript-eslint", "import", "unused-imports"],
   extends: [
     "eslint:recommended",
 
@@ -54,7 +54,7 @@ module.exports = {
     "import/order": [
       "warn",
       {
-        groups: ["builtin", "external", "parent", "sibling", "index", "type"],
+        groups: ["builtin", "external", "parent", "sibling", "index"],
         alphabetize: { order: "asc", caseInsensitive: true }
       }
     ],
@@ -220,6 +220,14 @@ module.exports = {
       }
     ],
     "@typescript-eslint/no-meaningless-void-operator": "warn", // https://typescript-eslint.io/rules/no-meaningless-void-operator
-    "@typescript-eslint/sort-type-union-intersection-members": "warn" // https://typescript-eslint.io/rules/sort-type-union-intersection-members
+    "@typescript-eslint/sort-type-union-intersection-members": "warn", // https://typescript-eslint.io/rules/sort-type-union-intersection-members
+
+    "@typescript-eslint/no-unused-vars": "off",
+    // https://github.com/sweepline/eslint-plugin-unused-imports
+    "unused-imports/no-unused-imports": "warn",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" }
+    ]
   }
 };
