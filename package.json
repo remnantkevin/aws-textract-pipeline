@@ -29,6 +29,7 @@
     "source-map-support": "0.5.21"
   },
   "devDependencies": {
+    "@aws-sdk/types": "3.78.0",
     "@types/aws-lambda": "8.10.98",
     "@types/node": "16.11.38",
     "@types/source-map-support": "0.5.4",
