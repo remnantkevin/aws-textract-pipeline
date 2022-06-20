@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+    
+    env:
+      AWS_REGION: us-east-1
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - name: Install dependencies for `extract-attachment` lambda function
+      run: npm ci
+      working-directory: src/lambda/functions/extract-attachment 
+    - name: Install dependencies for main project
+      run: npm ci
+    - name: Use sample config as config in CI
+      run: mv env.config.sample.ts env.config.ts
+    - run: npm run lint:check
+    - run: npm run build:noEmit
+    - run: npm run test
