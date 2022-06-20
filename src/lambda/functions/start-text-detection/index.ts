@@ -1,4 +1,4 @@
-import * as process from "process";
+import * as process from "node:process";
 import { StartDocumentTextDetectionCommand, TextractClient } from "@aws-sdk/client-textract";
 import type { S3Event } from "aws-lambda";
 import { EnvironmentVariables } from "./runtypes";
