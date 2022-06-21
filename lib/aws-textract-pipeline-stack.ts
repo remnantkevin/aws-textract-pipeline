@@ -78,6 +78,22 @@ export class AwsTextractPipelineStack extends cdk.Stack {
       })
     );
 
+    extractAttachmentFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:GetObject"],
+        effect: iam.Effect.ALLOW,
+        resources: [bucket.arnForObjects(`${props.S3_PREFIX_RAW_EMAIL}/*`)]
+      })
+    );
+
+    extractAttachmentFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:PutObject"],
+        effect: iam.Effect.ALLOW,
+        resources: [bucket.arnForObjects(`${props.S3_PREFIX_ATTACHMENT}/*`)]
+      })
+    );
+
     const textractPublishCompletionRole = new iam.Role(this, "allow-textract-to-publish-completion", {
       assumedBy: new iam.ServicePrincipal("textract.amazonaws.com")
     });
