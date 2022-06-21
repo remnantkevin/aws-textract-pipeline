@@ -106,7 +106,7 @@ async function uploadEmailAttachment(
     {
       bucket: envVariables.S3_BUCKET,
       contentType: "application/pdf",
-      key: `${envVariables.S3_PREFIX_ATTACHMENT}${requestId}`,
+      key: `${envVariables.S3_PREFIX_ATTACHMENT}/${requestId}`,
       readStream: attachmentReadStreamResult.value
     },
     getMetadataFromEmailHeaders(emailHeaders)

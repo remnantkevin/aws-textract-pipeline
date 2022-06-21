@@ -49,7 +49,7 @@ export class AwsTextractPipelineStack extends cdk.Stack {
     const emailReceivingRuleSet = new ses.ReceiptRuleSet(this, "rule-set", {
       rules: [
         {
-          actions: [new sesActions.S3({ bucket, objectKeyPrefix: props.S3_PREFIX_RAW_EMAIL })],
+          actions: [new sesActions.S3({ bucket, objectKeyPrefix: `${props.S3_PREFIX_RAW_EMAIL}/` })],
           enabled: true,
           recipients: [props.EMAIL_RECEIVING_EMAIL_ADDRESS],
           scanEnabled: true,
