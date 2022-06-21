@@ -20,7 +20,7 @@ mockLibStorageUpload(S3ClientMock);
 vi.mock("node:process", () => {
   const env: EnvironmentVariables = {
     S3_BUCKET: "bucket-name-test",
-    S3_PREFIX_ATTACHMENT: "prefix-name-test/"
+    S3_PREFIX_ATTACHMENT: "prefix-name-test"
   };
 
   return {
