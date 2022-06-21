@@ -22,7 +22,8 @@ function getDefaultLambdaProps(): Partial<NodejsFunctionProps> {
     },
     handler: "main",
     memorySize: 128,
-    reservedConcurrentExecutions: 1,
+    // TODO: Bring back when concurrent executions quota has been sorted out in my account.
+    // reservedConcurrentExecutions: 1,
     retryAttempts: 0,
     runtime: lambda.Runtime.NODEJS_16_X,
     timeout: cdk.Duration.seconds(DEFAULT_LAMBDA_TIMEOUT_SECONDS)
