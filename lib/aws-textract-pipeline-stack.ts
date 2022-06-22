@@ -49,7 +49,7 @@ export class AwsTextractPipelineStack extends cdk.Stack {
     const emailReceivingRuleSet = new ses.ReceiptRuleSet(this, "rule-set", {
       rules: [
         {
-          actions: [new sesActions.S3({ bucket, objectKeyPrefix: `${props.S3_PREFIX_RAW_EMAIL}/` })],
+          actions: [new sesActions.S3({ bucket, objectKeyPrefix: props.S3_PREFIX_RAW_EMAIL })],
           enabled: true,
           recipients: [props.EMAIL_RECEIVING_EMAIL_ADDRESS],
           scanEnabled: true,
@@ -74,7 +74,7 @@ export class AwsTextractPipelineStack extends cdk.Stack {
     extractAttachmentFunction.addEventSource(
       new lambdaEventSources.S3EventSource(bucket, {
         events: [s3.EventType.OBJECT_CREATED],
-        filters: [{ prefix: `${props.S3_PREFIX_RAW_EMAIL}/` }]
+        filters: [{ prefix: props.S3_PREFIX_RAW_EMAIL }]
       })
     );
 
@@ -82,7 +82,7 @@ export class AwsTextractPipelineStack extends cdk.Stack {
       new iam.PolicyStatement({
         actions: ["s3:GetObject"],
         effect: iam.Effect.ALLOW,
-        resources: [bucket.arnForObjects(`${props.S3_PREFIX_RAW_EMAIL}/*`)]
+        resources: [bucket.arnForObjects(`${props.S3_PREFIX_RAW_EMAIL}*`)]
       })
     );
 
@@ -90,7 +90,7 @@ export class AwsTextractPipelineStack extends cdk.Stack {
       new iam.PolicyStatement({
         actions: ["s3:PutObject"],
         effect: iam.Effect.ALLOW,
-        resources: [bucket.arnForObjects(`${props.S3_PREFIX_ATTACHMENT}/*`)]
+        resources: [bucket.arnForObjects(`${props.S3_PREFIX_ATTACHMENT}*`)]
       })
     );
 

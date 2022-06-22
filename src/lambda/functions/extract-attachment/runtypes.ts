@@ -3,11 +3,11 @@ import { dateAsString } from "../../shared/runtype-factories.js";
 
 export const EnvironmentVariables = sloppyRecord({
   S3_BUCKET: string({ minLength: 1 }),
-  S3_PREFIX_ATTACHMENT: string({ minLength: 1 })
+  S3_PREFIX_ATTACHMENT: string({ match: /\/$/, minLength: 2 })
 });
 export type EnvironmentVariables = ReturnType<typeof EnvironmentVariables>;
 
-const Email = string({ match: /@/, minLength: 1 });
+const Email = string({ match: /@/, minLength: 3 });
 
 export const EmailAddress = sloppyRecord({ address: Email });
 
