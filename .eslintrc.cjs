@@ -1,4 +1,5 @@
 /* eslint-disable sort-keys */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 
 module.exports = {
   root: true,
@@ -216,7 +217,8 @@ module.exports = {
         ignoreDefaultValues: true,
         ignoreNumericLiteralTypes: true,
         ignoreReadonlyClassProperties: true,
-        ignoreTypeIndexes: true
+        ignoreTypeIndexes: true,
+        ignore: [0, 1, 2]
       }
     ],
     "@typescript-eslint/no-meaningless-void-operator": "warn", // https://typescript-eslint.io/rules/no-meaningless-void-operator
