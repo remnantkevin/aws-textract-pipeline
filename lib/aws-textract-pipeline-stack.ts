@@ -122,15 +122,30 @@ export class AwsTextractPipelineStack extends cdk.Stack {
       })
     );
 
-    // TODO: does the function's execution role need s3 get and put access (because textract will get and
-    // store in s3); or does textract service need the permission? see also TestingTextractAllowStartDetectionPolicy in iam on admin account
-    //
-    // or is it om the s3 bucket policy side?
     startTextDetectionFunction.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["textract:StartDocumentTextDetection"],
         effect: iam.Effect.ALLOW,
         resources: ["*"]
+      })
+    );
+
+    startTextDetectionFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:GetObject"],
+        effect: iam.Effect.ALLOW,
+        resources: [
+          bucket.arnForObjects(`${props.S3_PREFIX_ATTACHMENT}*`),
+          bucket.arnForObjects(`${props.S3_PREFIX_TEXT_DETECTION_RESULT}*`) // TODO: why is this required?
+        ]
+      })
+    );
+
+    startTextDetectionFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:PutObject"],
+        effect: iam.Effect.ALLOW,
+        resources: [bucket.arnForObjects(`${props.S3_PREFIX_TEXT_DETECTION_RESULT}*`)]
       })
     );
   }

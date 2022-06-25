@@ -24,10 +24,14 @@ export async function main(event: S3Event) {
       },
       OutputConfig: {
         S3Bucket: envVariables.S3_BUCKET,
-        S3Prefix: envVariables.S3_PREFIX_TEXT_DETECTION_RESULT
+        S3Prefix: getTextractOutputConfigS3Prefix(envVariables.S3_PREFIX_TEXT_DETECTION_RESULT)
       }
     })
   );
 
   return { JobId: response.JobId, success: true };
+}
+
+function getTextractOutputConfigS3Prefix(s3Prefix: string): string {
+  return s3Prefix.slice(0, s3Prefix.length - 1);
 }
