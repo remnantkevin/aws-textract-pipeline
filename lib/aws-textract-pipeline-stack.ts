@@ -1,29 +1,32 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
-import * as path from "path";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import * as cdk from "aws-cdk-lib";
-import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as lambdaNodeJS from "aws-cdk-lib/aws-lambda-nodejs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ses from "aws-cdk-lib/aws-ses";
 import * as sesActions from "aws-cdk-lib/aws-ses-actions";
+import * as sns from "aws-cdk-lib/aws-sns";
 import type { Construct } from "constructs";
+import { lambdaProps } from "./stack-defaults.js";
 
-/*
-  It is assumed that there is already a Route 53 domain and hosted zone, and a verified
-  SES domain, available in the environment this stack is deployed to.
-
-  The `EMAIL_RECEIVING_EMAIL_ADDRESS` stack prop needs to be an email address that uses
-  the verified SES domain.
-*/
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 type AwsTextractPipelineStackProps = cdk.StackProps & {
+  /**
+   * The email address that receives the email which triggers the text extraction pipeline.
+   *
+   * The email address must use a verified SES domain, and it is assumed that there is already
+   * a Route 53 domain and hosted zone available in the environment this stack is deployed to.
+   */
   EMAIL_RECEIVING_EMAIL_ADDRESS: string;
-};
-
-const ENVIRONMENT_VARIABLES = {
-  S3_PREFIX_FOR_ATTACHMENT: "attachment/"
+  S3_PREFIX_ATTACHMENT: string;
+  S3_PREFIX_RAW_EMAIL: string;
+  S3_PREFIX_TEXT_DETECTION_RESULT: string;
 };
 
 export class AwsTextractPipelineStack extends cdk.Stack {
@@ -42,10 +45,11 @@ export class AwsTextractPipelineStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const emailReceivingRuleSet = new ses.ReceiptRuleSet(this, "rule-set", {
       rules: [
         {
-          actions: [new sesActions.S3({ bucket, objectKeyPrefix: "raw-email" })],
+          actions: [new sesActions.S3({ bucket, objectKeyPrefix: props.S3_PREFIX_RAW_EMAIL })],
           enabled: true,
           recipients: [props.EMAIL_RECEIVING_EMAIL_ADDRESS],
           scanEnabled: true,
@@ -54,27 +58,95 @@ export class AwsTextractPipelineStack extends cdk.Stack {
       ]
     });
 
-    const extractAttachmentFunction = new lambdaNodeJS.NodejsFunction(this, "extract-attachment", {
-      architecture: lambda.Architecture.ARM_64,
-      bundling: {
-        externalModules: ["aws-sdk"],
-        mainFields: ["module", "main"], // prefer ESM over CJS
-        minify: true,
-        sourceMap: true,
-        sourceMapMode: lambdaNodeJS.SourceMapMode.DEFAULT,
-        sourcesContent: false
-      },
-      entry: path.join(__dirname, "../src/lambda/extract-attachment/index.ts"),
-      environment: {
-        NODE_OPTIONS: "--enable-source-maps", // use source maps in logs
-        S3_BUCKET_FOR_ATTACHMENT: bucket.bucketName,
-        S3_PREFIX_FOR_ATTACHMENT: ENVIRONMENT_VARIABLES.S3_PREFIX_FOR_ATTACHMENT
-      },
-      handler: "main",
-      memorySize: 128,
-      retryAttempts: 0,
-      runtime: lambda.Runtime.NODEJS_16_X,
-      timeout: cdk.Duration.minutes(1) // downloading the raw email and uploading the attachment can take a while
+    const extractAttachmentFunction = new lambdaNodeJS.NodejsFunction(
+      this,
+      "extract-attachment",
+      lambdaProps({
+        entry: path.join(__dirname, "../src/lambda/functions/extract-attachment/index.ts"),
+        environment: {
+          S3_BUCKET: bucket.bucketName,
+          S3_PREFIX_ATTACHMENT: props.S3_PREFIX_ATTACHMENT
+        },
+        timeout: cdk.Duration.minutes(1) // downloading the raw email and uploading the attachment can take a while
+      })
+    );
+
+    extractAttachmentFunction.addEventSource(
+      new lambdaEventSources.S3EventSource(bucket, {
+        events: [s3.EventType.OBJECT_CREATED],
+        filters: [{ prefix: props.S3_PREFIX_RAW_EMAIL }]
+      })
+    );
+
+    extractAttachmentFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:GetObject"],
+        effect: iam.Effect.ALLOW,
+        resources: [bucket.arnForObjects(`${props.S3_PREFIX_RAW_EMAIL}*`)]
+      })
+    );
+
+    extractAttachmentFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:PutObject"],
+        effect: iam.Effect.ALLOW,
+        resources: [bucket.arnForObjects(`${props.S3_PREFIX_ATTACHMENT}*`)]
+      })
+    );
+
+    const textractPublishCompletionRole = new iam.Role(this, "allow-textract-to-publish-completion", {
+      assumedBy: new iam.ServicePrincipal("textract.amazonaws.com")
     });
+
+    const textDetectionCompleteTopic = new sns.Topic(this, "text-detection-complete-topic");
+    textDetectionCompleteTopic.grantPublish(textractPublishCompletionRole);
+
+    const startTextDetectionFunction = new lambdaNodeJS.NodejsFunction(
+      this,
+      "start-text-detection",
+      lambdaProps({
+        entry: path.join(__dirname, "../src/lambda/functions/start-text-detection/index.ts"),
+        environment: {
+          IAM_ROLE_ARN_TEXTRACT_PUBLISH_TO_SNS_TOPIC: textractPublishCompletionRole.roleArn,
+          S3_BUCKET: bucket.bucketName,
+          S3_PREFIX_TEXT_DETECTION_RESULT: props.S3_PREFIX_TEXT_DETECTION_RESULT,
+          SNS_TOPIC_ARN_COMPLETION_STATUS: textDetectionCompleteTopic.topicArn
+        }
+      })
+    );
+
+    startTextDetectionFunction.addEventSource(
+      new lambdaEventSources.S3EventSource(bucket, {
+        events: [s3.EventType.OBJECT_CREATED],
+        filters: [{ prefix: props.S3_PREFIX_ATTACHMENT }]
+      })
+    );
+
+    startTextDetectionFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["textract:StartDocumentTextDetection"],
+        effect: iam.Effect.ALLOW,
+        resources: ["*"]
+      })
+    );
+
+    startTextDetectionFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:GetObject"],
+        effect: iam.Effect.ALLOW,
+        resources: [
+          bucket.arnForObjects(`${props.S3_PREFIX_ATTACHMENT}*`),
+          bucket.arnForObjects(`${props.S3_PREFIX_TEXT_DETECTION_RESULT}*`) // TODO: why is this required?
+        ]
+      })
+    );
+
+    startTextDetectionFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:PutObject"],
+        effect: iam.Effect.ALLOW,
+        resources: [bucket.arnForObjects(`${props.S3_PREFIX_TEXT_DETECTION_RESULT}*`)]
+      })
+    );
   }
 }

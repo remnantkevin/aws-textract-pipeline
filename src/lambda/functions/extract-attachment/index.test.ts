@@ -2,21 +2,35 @@
 import { Buffer } from "node:buffer";
 import { createReadStream } from "node:fs";
 import * as path from "node:path";
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { mockClient, mockLibStorageUpload } from "aws-sdk-client-mock";
+import { fileURLToPath } from "node:url";
+import {
+  CreateMultipartUploadCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+  UploadPartCommand
+} from "@aws-sdk/client-s3";
+import { mockClient } from "aws-sdk-client-mock";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { EnvironmentVariables } from "./runtypes.js";
 import { generateContext } from "./test-helpers/test-context.js";
 import { generateS3PutEvent } from "./test-helpers/test-events.js";
 import { main } from "./index.js";
-import type { EnvironmentVariables } from "./runtypes.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// This is taken from the example given in the `aws-sdk-client-mock` README for
+// mocking `Upload` from `@aws-sdk/lib-storage`. For more details see:
+//   - https://github.com/m-radzikowski/aws-sdk-client-mock#lib-storage-upload
 const S3ClientMock = mockClient(S3Client);
-mockLibStorageUpload(S3ClientMock);
+S3ClientMock.on(CreateMultipartUploadCommand).resolves({ UploadId: "1" });
+S3ClientMock.on(UploadPartCommand).resolves({ ETag: "1" });
 
-vi.mock("process", () => {
+vi.mock("node:process", () => {
   const env: EnvironmentVariables = {
-    S3_BUCKET_FOR_ATTACHMENT: "bucket-name-test",
-    S3_PREFIX_FOR_ATTACHMENT: "prefix-name-test/"
+    S3_BUCKET: "bucket-name-test",
+    S3_PREFIX_ATTACHMENT: "prefix-name-test/"
   };
 
   return {
